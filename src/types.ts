@@ -14,3 +14,8 @@ export type TFormData = {
   img: File[];
   audio: File[];
 };
+
+export type TFiles = {
+  img: Express.Multer.File[];
+  audio: Express.Multer.File[];
+};

@@ -1,12 +1,13 @@
-require('dotenv').config();
 import console from 'console';
 import { MongoClient } from 'mongodb';
+
+require('dotenv').config();
 
 const URL = process.env.DB as string;
 console.log('DB URL', URL);
 const DBNAME = 'english-for-kids';
-const CATEGORIES = `categories`;
-const WORDS = `words`;
+const CATEGORIES = 'categories';
+const WORDS = 'words';
 
 async function getMongoInstance() {
   const client = await MongoClient.connect(URL, { useUnifiedTopology: true });

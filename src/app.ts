@@ -1,8 +1,10 @@
-require('dotenv').config();
 import express from 'express';
+import cors from 'cors';
 import Words from './routes/words';
 import Categories from './routes/categories';
-import cors from 'cors';
+
+require('dotenv').config();
+
 const app = express();
 const PORT = 3000;
 

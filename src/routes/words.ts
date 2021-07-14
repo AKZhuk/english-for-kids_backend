@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import { loader } from '../middleware/files';
-import { deleteWord, getAllWords, insertWord, updateWord } from '../storage/words';
-import { TWord } from '../types';
+import {
+  deleteWord, getAllWords, insertWord, updateWord,
+} from '../storage/words';
+import { TFiles, TWord } from '../types';
+
 const fs = require('fs/promises');
 const cloudinary = require('cloudinary').v2;
 
@@ -12,36 +15,47 @@ router.get('/getall', async (req, res) => {
   res.status(200).json(reqResult);
 });
 
-router.put('/update', async (req, res) => {
-  const word = req.query as TWord;
-  const reqResult = await updateWord(word.word, req.query as TWord);
+router.put('/update', loader.fields([{ name: 'img' }, { name: 'audio' }]), async (req, res) => {
+  const wordData: TWord = req.body;
+  const { id } = req.query;
+  if ((<TFiles>req.files).audio) {
+    const audioPath = await cloudinary.uploader.upload((<TFiles>req.files).audio[0].path, {
+      resource_type: 'auto',
+      folder: 'audio',
+      use_filename: true,
+      unique_filename: false,
+    });
+    wordData.audioSRC = audioPath.secure_url;
+    fs.unlink((req.files as TFiles).audio[0].path);
+  }
+  if ((<TFiles>req.files).img) {
+    const imgPath = await cloudinary.uploader.upload((<TFiles>req.files).img[0].path);
+    wordData.imageSRC = imgPath.secure_url;
+    fs.unlink((req.files as TFiles).img[0].path);
+  }
+  const reqResult = await updateWord(id as string, wordData);
   res.status(200).json(reqResult);
 });
 
 router.post('/create', loader.fields([{ name: 'img' }, { name: 'audio' }]), async (req, res) => {
-  console.log('create', req.body, req.files);
   const wordData: TWord = req.body;
   try {
-    console.log((<any>req.files)['audio'][0].path, 'llll');
-
-    const audioPath = await cloudinary.uploader.upload((<any>req.files)['audio'][0].path, {
+    const audioPath = await cloudinary.uploader.upload((<TFiles>req.files).audio[0].path, {
       resource_type: 'auto',
       folder: 'audio',
       use_filename: true,
+      unique_filename: false,
     });
-    console.log(audioPath);
 
     wordData.audioSRC = audioPath.secure_url;
-    fs.unlink((req.files as any)['audio'][0].path);
-    const imgPath = await cloudinary.uploader.upload((<any>req.files)['img'][0].path);
+    fs.unlink((req.files as TFiles).audio[0].path);
+    const imgPath = await cloudinary.uploader.upload((<TFiles>req.files).img[0].path);
     wordData.imageSRC = imgPath.secure_url;
-    fs.unlink((req.files as any)['img'][0].path);
-    console.log(wordData, 'load data');
+    fs.unlink((req.files as TFiles).img[0].path);
   } catch (e) {
-    console.log(e, 'something ent wrong');
+    console.log(e, 'something went wrong');
   }
 
-  console.log(wordData, 'load data 55');
   const reqResult = await insertWord(wordData);
   res.status(200).json(reqResult);
 });

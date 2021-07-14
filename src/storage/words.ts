@@ -17,12 +17,11 @@ export async function insertWord(word: TWord): Promise<string> {
   return insertedId;
 }
 
-export async function updateWord(name: string, word: TWord) {
+export async function updateWord(id: string, word: TWord): Promise<boolean> {
   const words = await wordsCollection;
-  const newWord = await words.updateOne({ word: name }, { $set: word });
-  console.log(newWord);
-
-  return newWord;
+  const objID = new ObjectId(id);
+  const response = await words.updateOne({ _id: objID }, { $set: word });
+  return Boolean(response.upsertedCount);
 }
 
 export async function deleteWord(id: string): Promise<boolean> {
@@ -33,4 +32,10 @@ export async function deleteWord(id: string): Promise<boolean> {
   });
 
   return Boolean(response.deletedCount);
+}
+
+export async function deleteWords(categoryId: string): Promise<number | undefined> {
+  const words = await wordsCollection;
+  const response = await words.deleteMany({ categoryID: categoryId });
+  return response.deletedCount;
 }

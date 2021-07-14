@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { TCategory } from '../types';
 import { categoriesCollection } from './collections';
+import { deleteWords } from './words';
 
 export async function getAllCategories(): Promise<TCategory[]> {
   const categories = await categoriesCollection;
@@ -24,16 +25,20 @@ export async function updateCategory(id: string, name: string): Promise<boolean>
     {
       _id: objID,
     },
-    { $set: { name: name } }
+    { $set: { name } },
   );
   return Boolean(response.modifiedCount);
 }
 
-export async function deleteCategory(id: string): Promise<boolean> {
-  const words = await categoriesCollection;
+export async function deleteCategory(id: string): Promise<{
+  category: number | undefined;
+  wordsCount: number | undefined;
+}> {
+  const categories = await categoriesCollection;
   const objID = new ObjectId(id);
-  const result = await words.deleteOne({
+  const result = await categories.deleteOne({
     _id: objID,
   });
-  return Boolean(result.deletedCount);
+  const wordsCount = await deleteWords(id);
+  return { category: result.deletedCount, wordsCount };
 }

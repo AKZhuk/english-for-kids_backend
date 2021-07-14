@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { deleteCategory, getAllCategories, insertCategory, updateCategory } from '../storage/categories';
+import {
+  deleteCategory, getAllCategories, insertCategory, updateCategory,
+} from '../storage/categories';
 import { TCategory } from '../types';
 
 const router = Router();
