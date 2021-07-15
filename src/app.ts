@@ -1,8 +1,10 @@
-require('dotenv').config();
 import express from 'express';
+import cors from 'cors';
 import Words from './routes/words';
 import Categories from './routes/categories';
-import cors from 'cors';
+
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,7 +24,7 @@ app.use((req, res) => {
   });
 });
 
-app.use((err: any, req: any, res: any) => {
+app.use((err: Error, req: express.Request, res: express.Response) => {
   res.status(500).json({
     statuscode: 500,
     message: err.message,

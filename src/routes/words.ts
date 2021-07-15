@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { loader } from '../middleware/files';
-import { deleteWord, getAllWords, insertWord, updateWord } from '../storage/words';
+import {
+  deleteWord, getAllWords, insertWord, updateWord,
+} from '../storage/words';
 import { TFiles, TWord } from '../types';
 
 const fs = require('fs/promises');
@@ -53,11 +55,10 @@ router.post('/create', loader.fields([{ name: 'img' }, { name: 'audio' }]), asyn
       wordData.imageSRC = imgPath.secure_url;
       fs.unlink((req.files as TFiles).img[0].path);
     } else {
-      wordData.imageSRC =
-        'https://res.cloudinary.com/dshgus1qp/image/upload/v1626286092/english-for-kids/img/default.jpg';
+      wordData.imageSRC = 'https://res.cloudinary.com/dshgus1qp/image/upload/v1626286092/english-for-kids/img/default.jpg';
     }
   } catch (e) {
-    console.log(e, 'something went wrong');
+    throw new Error(e);
   }
 
   const reqResult = await insertWord(wordData);
